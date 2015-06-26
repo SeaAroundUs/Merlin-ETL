@@ -25,23 +25,20 @@ SELECT distinct r.UniversalDataID, a.InheritedAtt_BelongsToReconstructionEEZID a
   FROM [dbo].[AllocationResult] r inner join [dbo].[AllocationSimpleArea] a on r.AllocationSimpleAreaID = a.AllocationSimpleAreaID
   group by r.UniversalDataID, a.InheritedAtt_BelongsToReconstructionEEZID , a.FaoAreaID
 
----------------------------------------------------------------------------------------------
 
 -- LMEs--------------------------------------------------------------------------------------
 
 USE Merlin
 drop table MerlinAgg.dbo.AllocationResult_LME
 
-select r.UniversalDataID ,cr.AreaID As LMEID, d.DataLayerID, d.FishingEntityID, d.InputTypeID, d.SectorTypeID, d.TaxonKey, d.Year,  sum(r.AllocatedCatch*cr.WaterArea/(c.WaterArea)) as TotalCatch
+select r.UniversalDataID ,cr.AreaID As LMEID,  sum(r.AllocatedCatch*cr.WaterArea/(c.WaterArea)) as TotalCatch
 into MerlinAgg.dbo.AllocationResult_LME
 from SimpleAreaCellAssignmentRaw cr 
 inner join Cell c on c.CellID = cr.CellID 
 inner join AllocationResult r on r.CellID = cr.CellID
-inner join data d on d.UniversalDataID = r.UniversalDataID
 where MarineLayerID = 3 and c.WaterArea > 0
-group by r.UniversalDataID, cr.AreaID, d.DataLayerID, d.FishingEntityID, d.InputTypeID, d.SectorTypeID, d.TaxonKey, d.Year
+group by r.UniversalDataID, cr.AreaID
 
------------------------------------------------------------------------------------------------------------------------------------------------------
 
 ---Global -------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -63,7 +60,21 @@ SELECT [UniversalDataID]
   group by [UniversalDataID]
   order by [UniversalDataID]
 
--------------------------------------------------------------------------------------------------------------------------------------------------------
+-- RFMOs--------------------------------------------------------------------------------------
+
+USE Merlin
+drop table MerlinAgg.dbo.AllocationResult_RFMO
+
+select r.UniversalDataID ,cr.AreaID As RFMOID,  sum(r.AllocatedCatch*cr.WaterArea/(c.WaterArea)) as TotalCatch
+into MerlinAgg.dbo.AllocationResult_RFMO
+from SimpleAreaCellAssignmentRaw cr 
+inner join Cell c on c.CellID = cr.CellID 
+inner join AllocationResult r on r.CellID = cr.CellID
+where MarineLayerID = 4 and c.WaterArea > 0
+group by r.UniversalDataID, cr.AreaID
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------
+
 GO
 
 
